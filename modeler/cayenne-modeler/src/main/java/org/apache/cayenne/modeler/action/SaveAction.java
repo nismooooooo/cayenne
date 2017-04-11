@@ -26,6 +26,9 @@ import java.io.File;
 import javax.swing.KeyStroke;
 
 import org.apache.cayenne.modeler.Application;
+import org.apache.cayenne.configuration.DataChannelDescriptor;
+import org.apache.cayenne.map.DataMap;
+import org.apache.cayenne.modeler.event.DataMapDisplayEvent;
 import org.apache.cayenne.pref.RenamedPreferences;
 import org.apache.cayenne.project.Project;
 import org.apache.cayenne.project.ProjectSaver;
@@ -86,6 +89,13 @@ public class SaveAction extends SaveAsAction {
 
         // Reset the watcher now
         getProjectController().getFileChangeTracker().reconfigure();
+
+        for(DataMap dataMap: getProjectController ().getCurrentDataChanel().getDataMaps()){
+            String[] dataMapPath = dataMap.getConfigurationSource().getURL().getFile().split("/");
+            dataMap.setLocation(dataMapPath[dataMapPath.length-1]);
+            getProjectController().fireDataMapDisplayEvent(new DataMapDisplayEvent(this, dataMap,
+                    (DataChannelDescriptor) Application.getInstance().getProject().getRootNode()));
+        }
 
         return true;
     }
